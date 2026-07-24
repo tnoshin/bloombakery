@@ -1,0 +1,63 @@
+body {
+    background-color: #310216;
+    margin: 0px;
+    padding: 0px;
+}
+
+h1 {
+    font-size: 100px;
+    color: white;
+    font-weight: bolder;
+    text-align: center;
+    text-shadow: 1px 1px 3px rgb(132, 59, 6)
+}
+
+nav {
+    background-color: #420314;
+    text-align: right;
+}
+
+form {
+    text-align: center;
+    font-size: 30px;
+    color: white;
+    text-shadow: 1px 1px 3px rgb(7, 0, 4)
+}
+
+button {
+    padding: 20px;
+    font-size: 20px;
+    background-color: #6D2D3E;
+    color: white;
+    border: 2px white;
+    border-radius: 20px;
+}
+
+button:hover {
+    background-color: #622435;
+    transform: scale(1.05);
+    cursor: pointer;
+}
+
+nav a {
+    padding: 30px;
+}
+
+nav .fa-facebook {
+    color: rgb(255, 255, 255);
+    font-size: 20px;
+}
+
+nav .fa-instagram,
+nav .fa-envelope {
+    color: rgb(255, 255, 255);
+    font-size: 20px;
+}
+@media(max-width:400px) {
+    h1 {
+    font-size: 60px;
+}
+form {
+    font-size: 18px;
+}
+}

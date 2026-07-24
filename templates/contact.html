@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="contact.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Bloom Bakery</title>
+</head>
+
+<body>
+    <nav>
+        <a href="https://www.facebook.com" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+        <a href="https://www.instagram.com" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+        <a href="mailto:hello@bloombakery.com" target="_blank"><i class="fa-solid fa-envelope"></i></a>
+    </nav>
+    <h1>Contact Us</h1>
+    <form action="https://formspree.io/f/xqegpqjy"
+  method="POST">
+        <p>
+            <label type="email" for="Name">First Name</label>
+            <input type="text" id="Name" name="Name">
+        </p>
+        <p>
+            <label for="Email">E-mail Address</label>
+            <input type="text" name="Email" id="Email">
+        </p>
+        <p>
+            <label for="Message">Message</label>
+            <textarea name="Message" id="Message"></textarea>
+        </p>
+        <button type="submit">Submit</button>
+    </form>
+    <script src="contact.js"></script>
+</body>
+
+</html>

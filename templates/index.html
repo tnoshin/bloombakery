@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Bloom Bakery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<base target="_blank">
+</head>
+
+<body>
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <nav>
+                <a href="#" class="navpad"></a>
+                <a href="#">Home</a>
+                <a href="#menu">Menu</a>
+                <a href="#footer">About</a>
+                <a href="contact.html" target="_blank">Contact Us</a>
+                <div class="nav-socials">
+                    <a href="https://www.facebook.com" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+                    <a href="https://www.instagram.com" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="mailto:hello@bloombakery.com" target="_blank"><i class="fa-solid fa-envelope"></i></a>
+                </div>
+            </nav>
+            <h1>The Bloom Bakery</h1>
+            <h5>Something sweet for the sweetest</h5>
+            <button><a class="abutton" href="mailto:tnoshin18@gmail.com">Order now</a></button>
+        </div>
+    </section>
+
+    <section>
+        <div class="menu">
+            <div class="menu-title">Our Top Picks</div>
+            <div class="menubox">
+                <div class="menu1">
+                    <img src="{{ url_for('static', filename='images/m1.jpg') }}" width="100px" height="100px" class="m1">
+                    <div class="item-name">Signature Cupcake</div>
+                    <p><del>Price $3.99</del><br><span class="sale-price">Only $2.99</span></p>
+                </div>
+                <div class="menu2">
+                    <img src="{{ url_for('static', filename='images/m2.jpg') }}" width="100px" height="100px" class="m2">
+                    <div class="item-name">Chocolate Fudge Cake</div>
+                    <p><del>Price $9.99</del><br><span class="sale-price">Only $8.99</span></p>
+                </div>
+                <div class="menu3">
+                    <img src="{{ url_for('static', filename='images/m3.jpg') }}" width="100px" height="100px" class="m3">
+                    <div class="item-name">Classic Cheesecake</div>
+                    <p><del>Price $8.99</del><br><span class="sale-price">Only $7.99</span></p>
+                </div>
+                <div class="menu4">
+                    <img src="{{ url_for('static', filename='images/m4.jpg') }}" width="100px" height="100px" class="m4">
+                    <div class="item-name">Donuts (6 pcs)</div>
+                    <p><del>Price $5.99</del><br><span class="sale-price">Only $4.99</span></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="menu">
+        <div class="mainmenusection">
+            <div class="mainmenu">
+                <h2 class="OURMENU">Our Menu</h2>
+                <div class="menu-columns">
+                    <div class="menu-column">
+                        <h3>Cupcakes</h3>
+                        <p class="mitems">Vanilla Dream — $2.99</p>
+                        <p class="mitems">Chocolate Bliss — $3.49</p>
+                        <p class="mitems">Strawberry Cloud — $3.49</p>
+
+                        <h3>Cakes</h3>
+                        <p class="mitems">Classic Cheesecake — $24.99</p>
+                        <p class="mitems">Chocolate Fudge — $28.99</p>
+                        <p class="mitems">Red Velvet — $26.99</p>
+                    </div>
+                    <div class="menu-column">
+                        <h3>Pastries</h3>
+                        <p class="mitems">Glazed Donuts (6 pcs) — $4.99</p>
+                        <p class="mitems">Cinnamon Roll — $3.99</p>
+                        <p class="mitems">Butter Croissant — $2.99</p>
+
+                        <h3>Drinks</h3>
+                        <p class="mitems">Iced Latte — $4.49</p>
+                        <p class="mitems">Strawberry Milkshake — $5.99</p>
+                        <p class="mitems">Hot Chocolate — $3.99</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="footer" id="footer">
+            <br> The Bloom Bakery <br>
+            Something sweet for the sweetest <br>
+            📍 142 Rosewood Avenue, Brooklyn, New York, NY 11201 <br>
+            📞 +1 (718) 555-0192 <br>
+            ✉ hello@bloombakery.com <br>
+            <br>
+            Opening Hours <br>
+            Mon - Fri: 7AM - 8PM <br>
+            Sat - Sun: 8AM - 9PM <br>
+            <br>
+            © 2026 The Bloom Bakery. All rights reserved.
+        </div>
+    </section>
+    <!-- Chatbot Bubble -->
+<div class="chat-bubble" id="chatBubble" onclick="toggleChat()">
+    <i class="fa-solid fa-comment-dots"></i>
+</div> 
+
+<!-- Chat Window -->
+<div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+        <span class="chat-title">Bloom Assistant 🌸</span>
+        <button class="chat-close" onclick="toggleChat()">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+        <div class="chat-msg bot">
+            Hi! I'm Bloom's assistant. Ask me anything about our menu or hours! 🍰
+        </div>
+    </div>
+    <div class="chat-input-area">
+        <input
+            type="text"
+            id="chatInput"
+            class="chat-input"
+            placeholder="Type a message..."
+            onkeydown="handleKey(event)"
+        />
+        <button class="chat-send" onclick="sendMessage()">
+            <i class="fa-solid fa-paper-plane"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+function toggleChat() {
+    document.getElementById('chatWindow').classList.toggle('open');
+}
+
+function toggleChat() {
+    document.getElementById('chatWindow').classList.toggle('open');
+    
+    // load history when chat opens
+    if (document.getElementById('chatWindow').classList.contains('open')) {
+        loadHistory();
+    }
+}
+
+async function loadHistory() {
+    const res = await fetch('/history');
+    const data = await res.json();
+    
+    const chatMessages = document.getElementById('chatMessages');
+    
+    data.messages.forEach(msg => {
+        chatMessages.innerHTML += `<div class="chat-msg ${msg.role}">${msg.content}</div>`;
+    });
+}
+
+async function sendMessage() {
+    const text = document.getElementById('chatInput').value.trim();
+    if (!text) return;
+    
+    // USER message 
+    document.getElementById('chatMessages').innerHTML += `<div class="chat-msg user">${text}</div>`;
+    document.getElementById('chatInput').value = '';
+    
+    const res = await fetch('/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({message: text})
+    });
+    const data = await res.json();
+    
+    //  BOT reply
+    document.getElementById('chatMessages').innerHTML += `<div class="chat-msg bot">${data.response}</div>`;
+
+function handleKey(event) {
+    if (event.key === 'Enter') {
+        sendMessage();
+    }
+}
+}
+</script>
+</body>
+
+</html>
+
