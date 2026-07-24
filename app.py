@@ -15,7 +15,10 @@ app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 api_key = os.getenv('GEMINI_API_KEY')
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chat.db'
+database_url = os.getenv('DATABASE_URL', 'sqlite:///chat.db')
+if database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://','postgresql://', 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 
 db= SQLAlchemy(app)
 
