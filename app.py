@@ -1,14 +1,11 @@
 from flask import Flask, request, jsonify, render_template, session
 from dotenv import load_dotenv
-import google.generativeai as genai
+import anthropic
 from flask_sqlalchemy import SQLAlchemy
 import secrets
 import os
 
 load_dotenv()
-
-genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
-model = genai.GenerativeModel('gemini-3.1-flash-lite')
 
 app = Flask(__name__)
 
@@ -31,6 +28,13 @@ class message(db.Model):
 with app.app_context():
     db.create_all()
 
+client = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
+
+system_prompt = """You are Bloom Assistant for Bloomberg Bakery.
+    Menu: Cupcakes $2.99-3.49, Cakes $24.99-28.99, Pastries $2.99-4.99, Drinks $3.99-5.99
+    Hours: Mon-Fri 7AM-8PM, Sat-Sun 8AM-9PM
+    Location: 142 Rosewood Ave, Brooklyn NY 11201 | Phone: (718) 555-0192
+    Stay on-topic. Call user 'Bestie'. Warm tone, use emojis, you are also encouraged to use playful remarks without insulting someone or hurting their feelings."""
 
 @app.route('/')
 def index():
@@ -49,46 +53,23 @@ def chat():
     db.session.add(user_msg)
     db.session.commit()
 
-
-    system_prompt = """ You are a helpful assistant for Bloom bakery.
-
-    Bakery information:
-    - List of items sold with their costs;
-    Cupcakes: Vanilla Dream — $2.99, Chocolate Bliss — $3.49, Strawberry Cloud — $3.49
-    Cakes: Classic Cheesecake — $24.99, Chocolate Fudge — $28.99, Red Velvet — $26.99
-    Pastries: Glazed Donuts (6 pcs) — $4.99, Cinnamon Roll — $3.99, Butter Croissant — $2.99
-    Drinks: Iced Latte — $4.49, Strawberry Milkshake — $5.99, Hot Chocolate — $3.99
-    - hours:  Mon - Fri: 7AM - 8PM and Sat - Sun: 8AM - 9PM
-    - Location:  142 Rosewood Avenue, Brooklyn, New York, NY 11201
-    - Phone: +1 (718) 555-0192 
-    
-    
-    
-    Answer questions helpfully and professionally. If the user asks about something you do not have enough information on, politely answer that you do not know and guide her to other ways you can offer help.
-    If the message is long, organize it nicely, use bullet points or emojis if necessary. Do not exceed 400 characters when you reply. If asked something unrelated to bakery, politely redirect. DO NOT ENGAGE IN ANY CONVERSATION UNRELATED TO THE BAKERY. Refer to the user as 'Bestie'. 
-    Have a friendly personality, use emojis in your texts, you are also encouraged to use playful remarks without insulting someone or hurting their feelings.
-
-    """
-    
-
-    
-
     history = message.query.filter_by(session_id=session_id).order_by(message.id.desc()).limit(10).all()
     history = history[::-1] 
 
-    history_text = ''
-    for m in history:
-        if m.role == 'user':
-            history_text += f'\nUser: {m.content}'
-        else:
-            history_text += f'\nAssistant: {m.content}'
+    claude_messages = [
+        {'role':'user' if m.role == 'user' else 'assistant', 'content':m.content}
+        for m in history
+    ]
 
+    response = client.messages.create(
+        model='claude-haiku-4-5-20251001',
+        max_tokens=300,
+        system=system_prompt,
+        messages=claude_messages
+    )
 
-    full_message = system_prompt + '\n\nConversation so far:' + history_text + '\n\nuser: ' + user_message
-    
-    response = model.generate_content(full_message)
-
-    bot_msg = message(session_id=session_id, role='bot', content=response.text)
+    reply = response.content[0].text
+    bot_msg = message(session_id=session_id, role='bot', content=reply)
     db.session.add(bot_msg)
     db.session.commit()
     return jsonify({'response':response.text})
