@@ -69,7 +69,7 @@ def chat():
     reply = response.content[0].text
     db.session.add(message(session_id=session_id, role='bot', content=reply))
     db.session.commit()
-    return jsonify({'response':response.text})
+    return jsonify({'response':response.content[0].text})
 
 
 @app.route('/history', methods=['GET'])
