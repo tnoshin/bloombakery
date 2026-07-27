@@ -29,13 +29,11 @@ with app.app_context():
 
 client = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
 
-system_prompt = """You are Bloom Assistant for Bloomberg Bakery.
+system_prompt = """You are Assistant for Bloom Bakery.
     Menu: Cupcakes $2.99-3.49, Cakes $24.99-28.99, Pastries $2.99-4.99, Drinks $3.99-5.99
     Hours: Mon-Fri 7AM-8PM, Sat-Sun 8AM-9PM
     Location: 142 Rosewood Ave, Brooklyn NY 11201 | Phone: (718) 555-0192
-
     Stay on-topic. Call user 'Bestie'. Warm tone, use emojis., you are also encouraged to use playful remarks without insulting someone or hurting their feelings.Do not use markdown formatting like asterisks or bold text. Respond in plain text only."""
-
 
 @app.route('/')
 def index():
