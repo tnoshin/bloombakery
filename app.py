@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, render_template, session
 from dotenv import load_dotenv
-import anthropic
+from openai import OpenAI
 from flask_sqlalchemy import SQLAlchemy
 import secrets
 import os
@@ -27,8 +27,10 @@ class message(db.Model):
 with app.app_context():
     db.create_all()
 
-client = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
-
+client = OpenAI(
+    api_key=os.getenv('DEEPSEEK_API_KEY'),
+    base_url='https://api.deepseek.com'
+)
 system_prompt = """You are Assistant for Bloom Bakery.
     Menu: Cupcakes $2.99-3.49, Cakes $24.99-28.99, Pastries $2.99-4.99, Drinks $3.99-5.99
     Hours: Mon-Fri 7AM-8PM, Sat-Sun 8AM-9PM
@@ -54,22 +56,20 @@ def chat():
     history = message.query.filter_by(session_id=session_id).order_by(message.id.desc()).limit(10).all()
     history = history[::-1] 
 
-    claude_messages = [
+    deepseek_messages = [{'role':'system','content': system_prompt}]+[
         {'role':'user' if m.role == 'user' else 'assistant', 'content':m.content}
         for m in history
     ]
 
-    response = client.messages.create(
-        model='claude-haiku-4-5-20251001',
-        max_tokens=300,
-        system=system_prompt,
-        messages=claude_messages
+    response = client.chat.completions.create(
+        model='deepseek-v4-flash',
+        messages=deepseek_messages
     )
 
-    reply = response.content[0].text
+    reply = response.content[0].message.content
     db.session.add(message(session_id=session_id, role='bot', content=reply))
     db.session.commit()
-    return jsonify({'response':response.content[0].text})
+    return jsonify({'response':reply})
 
 
 @app.route('/history', methods=['GET'])
