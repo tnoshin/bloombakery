@@ -66,7 +66,7 @@ def chat():
         messages=deepseek_messages
     )
 
-    reply = response.content[0].message.content
+    reply = response.choices[0].message.content
     db.session.add(message(session_id=session_id, role='bot', content=reply))
     db.session.commit()
     return jsonify({'response':reply})
