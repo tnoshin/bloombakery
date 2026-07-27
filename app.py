@@ -33,7 +33,9 @@ system_prompt = """You are Bloom Assistant for Bloomberg Bakery.
     Menu: Cupcakes $2.99-3.49, Cakes $24.99-28.99, Pastries $2.99-4.99, Drinks $3.99-5.99
     Hours: Mon-Fri 7AM-8PM, Sat-Sun 8AM-9PM
     Location: 142 Rosewood Ave, Brooklyn NY 11201 | Phone: (718) 555-0192
-    Stay on-topic. Call user 'Bestie'. Warm tone, use emojis., you are also encouraged to use playful remarks without insulting someone or hurting their feelings."""
+
+    Stay on-topic. Call user 'Bestie'. Warm tone, use emojis., you are also encouraged to use playful remarks without insulting someone or hurting their feelings.Do not use markdown formatting like asterisks or bold text. Respond in plain text only."""
+
 
 @app.route('/')
 def index():
@@ -69,7 +71,7 @@ def chat():
     reply = response.content[0].text
     db.session.add(message(session_id=session_id, role='bot', content=reply))
     db.session.commit()
-    return jsonify({'response':response.text})
+    return jsonify({'response':response.content[0].text})
 
 
 @app.route('/history', methods=['GET'])
@@ -89,4 +91,5 @@ def history():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
+
 
