@@ -10,7 +10,6 @@ load_dotenv()
 app = Flask(__name__)
 
 app.secret_key = os.getenv('SECRET_KEY')
-api_key = os.getenv('GEMINI_API_KEY')
 
 database_url = os.getenv('DATABASE_URL', 'sqlite:///chat.db')
 if database_url.startswith('postgres://'):
@@ -34,7 +33,7 @@ system_prompt = """You are Bloom Assistant for Bloomberg Bakery.
     Menu: Cupcakes $2.99-3.49, Cakes $24.99-28.99, Pastries $2.99-4.99, Drinks $3.99-5.99
     Hours: Mon-Fri 7AM-8PM, Sat-Sun 8AM-9PM
     Location: 142 Rosewood Ave, Brooklyn NY 11201 | Phone: (718) 555-0192
-    Stay on-topic. Call user 'Bestie'. Warm tone, use emojis, you are also encouraged to use playful remarks without insulting someone or hurting their feelings."""
+    Stay on-topic. Call user 'Bestie'. Warm tone, use emojis., you are also encouraged to use playful remarks without insulting someone or hurting their feelings."""
 
 @app.route('/')
 def index():
@@ -44,13 +43,12 @@ def index():
 def chat():
     if 'session_id' not in session:
         session['session_id']=secrets.token_hex(8)
-
     session_id = session['session_id']
+
     data = request.get_json()
     user_message = data['message']
 
-    user_msg = message(session_id=session_id, role='user', content=user_message)
-    db.session.add(user_msg)
+    db.session.add(message(session_id=session_id, role='user', content=user_message))
     db.session.commit()
 
     history = message.query.filter_by(session_id=session_id).order_by(message.id.desc()).limit(10).all()
@@ -69,8 +67,7 @@ def chat():
     )
 
     reply = response.content[0].text
-    bot_msg = message(session_id=session_id, role='bot', content=reply)
-    db.session.add(bot_msg)
+    db.session.add(message(session_id=session_id, role='bot', content=reply))
     db.session.commit()
     return jsonify({'response':response.text})
 
