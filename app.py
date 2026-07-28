@@ -59,7 +59,9 @@ def index():
     return render_template('index.html')
 
 @app.route('/chat', methods=['POST'])
+@limiter.limit('5 per minute')
 def chat():
+    print(f"Request from IP: {get_remote_address()}") 
     if 'session_id' not in session:
         session['session_id']=secrets.token_hex(8)
     session_id = session['session_id']
