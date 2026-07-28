@@ -121,11 +121,7 @@
             <i class="fa-solid fa-xmark"></i>
         </button>
     </div>
-    <div class="chat-messages" id="chatMessages">
-        <div class="chat-msg bot">
-            Hi! I'm Bloom's assistant. Ask me anything about our menu or hours! 🍰
-        </div>
-    </div>
+    <div class="chat-messages" id="chatMessages"></div>
     <div class="chat-input-area">
         <input
             type="text"
@@ -168,13 +164,14 @@ async function loadHistory() {
         const res = await fetch('/history');
         const data = await res.json();
         
-
-        document.getElementById('chatMessages').innerHTML = '';
+        const chatMessages = document.getElementById('chatMessages');
+        chatMessages.innerHTML = '';
         
-        data.messages.forEach(msg => {
-
-            addMessage(msg.role, msg.content);
-        });
+        if (data.messages.length === 0) {
+            addMessage('bot', "Hi! I'm Bloom's assistant. Ask me anything about our menu or hours! 🍰");
+        } else {
+            data.messages.forEach(msg => addMessage(msg.role, msg.content));
+        }
     } catch (err) {
         console.error('Could not load history:', err);
         addMessage('bot', 'Could not load previous messages.');
