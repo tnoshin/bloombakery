@@ -35,6 +35,7 @@ system_prompt = """You are Bloom Assistant for Bloomberg Bakery.
     Location: 142 Rosewood Ave, Brooklyn NY 11201 | Phone: (718) 555-0192
     Stay on-topic. Call user 'Bestie'. Warm tone, use emojis., you are also encouraged to use playful remarks without insulting someone or hurting their feelings.Do not use markdown formatting like asterisks or bold text. Respond in plain text only."""
 
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -52,6 +53,10 @@ def chat():
 
     if len(user_message)>2000:
         return jsonify({'error':'Message too long (max 2000 characters)'}), 400
+
+    suspicious = ['<script', 'javascript:', 'onerror=', 'onload=']
+    if any(s in user_message.lower() for s in suspicious):
+        return jsonify({'error': 'Invalid characters in message'}), 400
 
     db.session.add(message(session_id=session_id, role='user', content=user_message))
     db.session.commit()
@@ -102,7 +107,6 @@ def history():
         {'role':m.role, 'content':m.content}
         for m in messages
     ]})
-
 
 
 if __name__ == '__main__':
