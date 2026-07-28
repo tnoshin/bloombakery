@@ -12,13 +12,13 @@ load_dotenv()
 
 app = Flask(__name__)
 
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
     default_limits=['200 per day','50 per hour'],
     storage_uri='memory://'
 )
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
 app.secret_key = os.getenv('SECRET_KEY')
 
 database_url = os.getenv('DATABASE_URL', 'sqlite:///chat.db')
@@ -73,9 +73,6 @@ def chat():
     if len(user_message)>2000:
         return jsonify({'error':'Message too long (max 2000 characters)'}), 400
 
-    suspicious = ['<script', 'javascript:', 'onerror=', 'onload=']
-    if any(s in user_message.lower() for s in suspicious):
-        return jsonify({'error': 'Invalid characters in message'}), 400
 
     db.session.add(message(session_id=session_id, role='user', content=user_message))
     db.session.commit()
@@ -129,7 +126,7 @@ def history():
 
 @app.errorhandler(429)
 def rate_limit_exceeded(e):
-    return jsonify({'error':'You are sending too many messages at once. Please wait a moment'})
+    return jsonify({'error':'You are sending too many messages at once. Please wait a moment'}), 429
 
 
 if __name__ == '__main__':
