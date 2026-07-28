@@ -31,6 +31,10 @@ if database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://','postgresql://', 1)
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SECURE'] = os.getenv('RENDER') is not None
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
 db= SQLAlchemy(app)
 
 class message(db.Model):
