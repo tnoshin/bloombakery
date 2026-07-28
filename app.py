@@ -12,7 +12,12 @@ load_dotenv()
 
 app = Flask(__name__)
 
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=2)
+def get_real_ip():
+    forwarded = request.headers.get('X-Forwarded-For')
+    if forwarded:
+        return forwarded.split(',')[0].strip()
+    return request.remote_addr
+
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
@@ -59,8 +64,10 @@ def index():
     return render_template('index.html')
 
 @app.route('/chat', methods=['POST'])
+@limiter.limit('5 per minute')
 def chat():
-    print(f"[DEBUG] Real IP: {get_remote_address()}")
+    print(f"Real IP: {get_real_ip()}")  
+    print(f"X-Forwarded-For header: {request.headers.get('X-Forwarded-For')}")
     if 'session_id' not in session:
         session['session_id']=secrets.token_hex(8)
     session_id = session['session_id']
