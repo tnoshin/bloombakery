@@ -12,7 +12,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=2)
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
