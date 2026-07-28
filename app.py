@@ -1,4 +1,7 @@
 from flask import Flask, request, jsonify, render_template, session
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from werkzeug.middleware.proxy_fix import ProxyFix
 from dotenv import load_dotenv
 import anthropic
 from flask_sqlalchemy import SQLAlchemy
@@ -9,6 +12,13 @@ load_dotenv()
 
 app = Flask(__name__)
 
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=['200 per day','50 per hour'],
+    storage_uri='memory://'
+)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
 app.secret_key = os.getenv('SECRET_KEY')
 
 database_url = os.getenv('DATABASE_URL', 'sqlite:///chat.db')
@@ -49,6 +59,7 @@ def index():
     return render_template('index.html')
 
 @app.route('/chat', methods=['POST'])
+@limiter.limit('5 per minute')
 def chat():
     if 'session_id' not in session:
         session['session_id']=secrets.token_hex(8)
@@ -115,6 +126,10 @@ def history():
         {'role':m.role, 'content':m.content}
         for m in messages
     ]})
+
+@app.errorhandler(429)
+def rate_limit_exceeded(e):
+    return jsonify({'error':'You are sending too many messages at once. Please wait a moment'})
 
 
 if __name__ == '__main__':
