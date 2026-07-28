@@ -16,7 +16,7 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
-    default_limits=['200 per day','50 per hour'],
+    default_limits=['200 per day', '50 per hour', '5 per minute'],
     storage_uri='memory://'
 )
 app.secret_key = os.getenv('SECRET_KEY')
@@ -59,7 +59,6 @@ def index():
     return render_template('index.html')
 
 @app.route('/chat', methods=['POST'])
-@limiter.limit('5 per minute')
 def chat():
     if 'session_id' not in session:
         session['session_id']=secrets.token_hex(8)
