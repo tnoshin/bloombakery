@@ -168,13 +168,13 @@ async function loadHistory() {
         chatMessages.innerHTML = '';
         
         if (data.messages.length === 0) {
-            addMessage('bot', "Hi! I'm Bloom's assistant. Ask me anything about our menu or hours! 🍰");
+            addMessage('assistant', "Hi! I'm Bloom's assistant. Ask me anything about our menu or hours! 🍰");
         } else {
             data.messages.forEach(msg => addMessage(msg.role, msg.content));
         }
     } catch (err) {
         console.error('Could not load history:', err);
-        addMessage('bot', 'Could not load previous messages.');
+        addMessage('assistant', 'Could not load previous messages.');
     }
 }
 
@@ -202,12 +202,12 @@ async function sendMessage() {
         }
         
 
-        addMessage('bot', data.response);
+        addMessage('assistant', data.response);
         
     } catch (err) {
 
         console.error('Send failed:', err);
-        addMessage('bot', 'Could not reach the server. Please check your connection.');
+        addMessage('assistant', 'Could not reach the server. Please check your connection.');
     }
 }
 
