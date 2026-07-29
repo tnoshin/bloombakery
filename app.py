@@ -3,7 +3,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.middleware.proxy_fix import ProxyFix
 from dotenv import load_dotenv
-import anthropic
+import google.generativeai as genai
 from flask_sqlalchemy import SQLAlchemy
 import secrets
 import os
@@ -46,7 +46,8 @@ class message(db.Model):
 with app.app_context():
     db.create_all()
 
-client = anthropic.Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
+genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+model = genai.GenerativeModel('gemini-3.1-flash-lite')
 
 system_prompt = """YYou are a helpful assistant for Bloom bakery.
     Bakery information:
@@ -91,36 +92,28 @@ def chat():
     history = message.query.filter_by(session_id=session_id).order_by(message.id.desc()).limit(10).all()
     history = history[::-1] 
 
-    claude_messages = [
-        {'role':'user' if m.role == 'user' else 'assistant', 'content':m.content}
-        for m in history
-    ]
+
+    history_text = ''
+    for m in history:
+        if m.role == 'user':
+            history_text += f'\nuser: {m.content}'
+        else:
+            history_text += f'\nAssistant: {m.content}'
+
+    full_message = system_prompt + '\n\nConversation so far:' + history_text + '\n\nuser' + user_message
 
     try:
-        response = client.messages.create(
-        model='claude-haiku-4-5-20251001',
-        max_tokens=300,
-        system=system_prompt,
-        messages=claude_messages
-        )
-        if not response.content or not response.content[0].text:
-            return jsonify({'error': 'No response generated, please rephrase.'}), 500
-        reply = response.content[0].text
-    except anthropic.APIConnectionError:
-        return jsonify({'error': 'Cannot reach the AI service. Please try again.'}), 503
-    except anthropic.RateLimitError:
-        return jsonify({'error': 'Too many requests. Please wait a moment.'}), 429
-    except anthropic.APIStatusError as e:
-        print(f"Anthropic API error: {e.status_code} - {e.message}")
-        return jsonify({'error': 'AI service error. Please try again.'}), 503
+        response = model.generate_content(full_message)
+        if not response.text:
+            return jsonify({'error':'No response generated, please rephrase'}), 500
     except Exception as e:
-        print(f"Unexpected error in chat: {e}")
+        print(f"Gemini API error: {e}")
         return jsonify({'error': 'Something went wrong. Please try again.'}), 500
         
 
-    db.session.add(message(session_id=session_id, role='bot', content=reply))
+    db.session.add(message(session_id=session_id, role='bot', content=response))
     db.session.commit()
-    return jsonify({'response':reply})
+    return jsonify({'response':response})
 
 
 @app.route('/history', methods=['GET'])
