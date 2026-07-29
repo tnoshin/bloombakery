@@ -100,7 +100,7 @@ def chat():
         else:
             history_text += f'\nAssistant: {m.content}'
 
-    full_message = system_prompt + '\n\nConversation so far:' + history_text + '\n\nuser' + user_message
+    full_message = system_prompt + '\n\nConversation so far: ' + history_text + '\n\nuser: ' + user_message
 
     try:
         response = model.generate_content(full_message)
@@ -111,9 +111,9 @@ def chat():
         return jsonify({'error': 'Something went wrong. Please try again.'}), 500
         
 
-    db.session.add(message(session_id=session_id, role='bot', content=response))
+    db.session.add(message(session_id=session_id, role='bot', content=response.text))
     db.session.commit()
-    return jsonify({'response':response})
+    return jsonify({'response':response.text})
 
 
 @app.route('/history', methods=['GET'])
