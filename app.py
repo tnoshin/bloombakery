@@ -10,7 +10,7 @@ import os
 
 load_dotenv()
 
-app = Flask(__name__)
+app= Flask(__name__)
 
 def get_real_ip():
     forwarded = request.headers.get('X-Forwarded-For')
@@ -21,9 +21,10 @@ def get_real_ip():
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
-    default_limits=['200 per day', '50 per hour', '5 per minute'],
+    default_limits=['200 per day','50 per hour','8 per minute'],
     storage_uri='memory://'
 )
+
 app.secret_key = os.getenv('SECRET_KEY')
 
 database_url = os.getenv('DATABASE_URL', 'sqlite:///chat.db')
@@ -31,11 +32,12 @@ if database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://','postgresql://', 1)
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 
-app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_HTTPONLY']=True
 app.config['SESSION_COOKIE_SECURE'] = os.getenv('RENDER') is not None
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SAMESITE']='Lax'
 
-db= SQLAlchemy(app)
+
+db = SQLAlchemy(app)
 
 class message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -49,7 +51,7 @@ with app.app_context():
 genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
 model = genai.GenerativeModel('gemini-3.1-flash-lite')
 
-system_prompt = """YYou are a helpful assistant for Bloom bakery.
+system_prompt = """You are a helpful assistant for Bloom bakery.
     Bakery information:
     - List of items sold with their costs;
     Cupcakes: Vanilla Dream — $2.99, Chocolate Bliss — $3.49, Strawberry Cloud — $3.49
@@ -63,57 +65,52 @@ system_prompt = """YYou are a helpful assistant for Bloom bakery.
     If the message is long, organize it nicely, use bullet points or emojis if necessary. If asked something unrelated to bakery, politely redirect. DO NOT ENGAGE IN ANY CONVERSATION UNRELATED TO THE BAKERY. Refer to the user as 'Bestie'. 
     Have a friendly personality, use emojis in your texts, you are also encouraged to use playful remarks without insulting someone or hurting their feelings. Do not overuse asterisks or bullet points, start a new line for better readability while listing menu ingredients."""
 
-
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/chat', methods=['POST'])
-@limiter.limit('5 per minute')
 def chat():
-    print(f"Real IP: {get_real_ip()}")  
-    print(f"X-Forwarded-For header: {request.headers.get('X-Forwarded-For')}")
+    print(f'Real IP: {get_real_ip()}')
+    print(f'X-Forwarded-For header: {request.headers.get("X-Forwarded-For")}')
     if 'session_id' not in session:
         session['session_id']=secrets.token_hex(8)
     session_id = session['session_id']
 
     data = request.get_json() or {}
-    user_message = data.get('message', '').strip()
+    user_message = data.get('message','').strip()
     if not user_message:
         return jsonify({'error':'Please send a message'}), 400
 
-    if len(user_message)>2000:
-        return jsonify({'error':'Message too long (max 2000 characters)'}), 400
-
+    if len(user_message)>1500: #ask the customer how long they'll allow the user's msg to be
+        return jsonify({'error':'Message too long(max 1500 characters)'}), 400
 
     db.session.add(message(session_id=session_id, role='user', content=user_message))
     db.session.commit()
 
-    history = message.query.filter_by(session_id=session_id).order_by(message.id.desc()).limit(10).all()
-    history = history[::-1] 
+    recent_msg = message.query.filter_by(session_id=session_id).order_by(message.id.desc()).limit(10).all()
+    recent_msg.reverse()
 
-
-    history_text = ''
-    for m in history:
+    conversation_context = ''
+    for m in recent_msg:
         if m.role == 'user':
-            history_text += f'\nuser: {m.content}'
+            conversation_context += f'\nUser: {m.content}'
         else:
-            history_text += f'\nAssistant: {m.content}'
+            conversation_context += f'\nAssistant: {m.content}'
 
-    full_message = system_prompt + '\n\nConversation so far: ' + history_text + '\n\nuser: ' + user_message
+    full_msg = system_prompt + '\n\nConversation so far: ' + conversation_context + '\n\nuser: ' + user_message
 
     try:
-        response = model.generate_content(full_message)
-        if not response.text:
-            return jsonify({'error':'No response generated, please rephrase'}), 500
-    except Exception as e:
-        print(f"Gemini API error: {e}")
-        return jsonify({'error': 'Something went wrong. Please try again.'}), 500
-        
+        reply = model.generate_content(full_msg)
+        if not reply.text:
+            return jsonify({'error': 'No response generated, please rephrase'}), 500
+    except Exception as error:
+        print(f'Gemini API error: {error}')
+        return jsonify({'error':'Something went wrong. Please try again.'}), 500
 
-    db.session.add(message(session_id=session_id, role='bot', content=response.text))
+    db.session.add(message(session_id=session_id, role='assistant', content=reply.text))
     db.session.commit()
-    return jsonify({'response':response.text})
+    return jsonify({'response':reply.text})
 
 
 @app.route('/history', methods=['GET'])
@@ -123,16 +120,18 @@ def history():
     session_id = session['session_id']
     messages = message.query.filter_by(session_id=session_id).all()
 
-    return jsonify({'messages':[
-        {'role':m.role, 'content':m.content}
-        for m in messages
-    ]})
+    result = []
+    for m in messages:
+        result.append({'role':m.role, 'content': m.content})
+    return jsonify({'messages':result})
 
 @app.errorhandler(429)
 def rate_limit_exceeded(e):
-    return jsonify({'error':'You are sending too many messages at once. Please wait a moment'}), 429
-
+    return jsonify({'error':'You are sending too many messages at once, please wait a moment.'}), 429
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
+    
+        
+
