@@ -592,7 +592,7 @@ p {
     background-color: #3a2828;
 }
 
-.chat-msg.bot {
+.chat-msg.assistant {
     background-color: rgba(109, 45, 62, 0.45);
     color: rgba(255,255,255,0.9);
     align-self: flex-start;
