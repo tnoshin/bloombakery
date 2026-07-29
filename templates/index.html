@@ -197,7 +197,7 @@ async function sendMessage() {
         
 
         if (!res.ok || data.error) {
-            addMessage('bot', data.error || 'Something went wrong. Please try again.');
+            addMessage('assistant', data.error || 'Something went wrong. Please try again.');
             return;
         }
         
