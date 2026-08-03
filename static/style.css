@@ -74,7 +74,7 @@ nav a:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('/static/images/p4.png');
+    background-image: url('/static/images/p6.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -88,7 +88,7 @@ nav a:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(49, 2, 22, 0.4);
+
 }
 
 .hero-content {
@@ -96,6 +96,7 @@ nav a:hover {
     z-index: 1;
     color: white;
     padding-top: 80px;
+    backdrop-filter: blur(2px);
 }
 
 h1 {
@@ -103,15 +104,19 @@ h1 {
     text-align: center;
     font-size: 100px;
     font-weight: bolder;
-    color: rgb(255, 255, 255);
+    color: #ffffff;
     font-family: 'Dancing Script', cursive;
     padding-bottom: 0px;
     margin-bottom: 0px;
-    text-shadow: 2px 2px 8px rgba(7, 0, 4, 0.6);
+    text-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.8),
+        0 2px 4px rgba(0, 0, 0, 0.6),
+        0 4px 12px rgba(0, 0, 0, 0.5),
+        0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 h5 {
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.95);
     text-align: center;
     font-family: 'Dancing Script', cursive;
     font-size: 40px;
@@ -119,7 +124,10 @@ h5 {
     margin-top: 10px;
     padding-bottom: 0px;
     margin-bottom: 0px;
-    text-shadow: 1px 1px 4px rgba(7, 0, 4, 0.5);
+    text-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.7),
+        0 2px 8px rgba(0, 0, 0, 0.5),
+        0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 button {
