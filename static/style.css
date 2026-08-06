@@ -671,6 +671,14 @@ p {
     transform: none;
     box-shadow: none;
 }
+.alert{
+    font-size: 12px;
+    padding: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    text-align: center;
+    color: #5d0101;
+    }  
 
 @media (max-width: 768px) {
     .chat-window {
@@ -678,6 +686,10 @@ p {
         right: 20px;
         bottom: 90px;
     }
+    .alert{
+        font-size: 9px;
+    }
+ 
 
     .chat-bubble {
         right: 20px;
